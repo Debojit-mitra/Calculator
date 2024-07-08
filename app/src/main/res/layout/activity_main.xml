@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="bottom"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+    <!-- Display -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="bottom">
+        <TextView
+            android:id="@+id/lastDisplay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:textSize="26sp"
+            android:background="@null"
+            android:gravity="end|bottom" />
+
+        <EditText
+            android:id="@+id/numDisplay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textSize="50sp"
+            android:gravity="end|bottom"
+            android:background="@null"
+            android:inputType="none"
+            android:cursorVisible="true"
+            android:focusableInTouchMode="true"/>
+    </LinearLayout>
+    <!-- Buttons -->
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:columnCount="4"
+        android:rowCount="5"
+        android:layout_gravity="center">
+
+        <!-- Row 1 -->
+        <Button
+            android:text="AC"
+            android:id="@+id/btnAc"
+            android:backgroundTint="?attr/colorTertiaryContainer"
+            style="@style/CalculatorButton"/>
+        <Button
+            android:text="("
+            android:id="@+id/btnParenthesesFirst"
+            android:elevation="8dp"
+            android:backgroundTint="?attr/colorOnSecondary"
+            style="@style/CalculatorButton"/>
+        <Button
+            android:text=")"
+            android:id="@+id/btnParenthesesSecond"
+            android:backgroundTint="?attr/colorOnSecondary"
+            style="@style/CalculatorButton"/>
+        <Button
+            android:text="⌫"
+            android:id="@+id/btnDel"
+            android:textSize="25sp"
+            android:backgroundTint="?attr/colorTertiaryContainer"
+            style="@style/CalculatorButton"/>
+
+        <!-- Row 2 -->
+        <Button
+            android:text="%"
+            android:id="@+id/btnPercentage"
+            android:backgroundTint="?attr/colorPrimaryInverse"
+            style="@style/CalculatorButton"/>
+        <Button
+            android:text="√"
+            android:id="@+id/btnRootOver"
+            android:backgroundTint="?attr/colorPrimaryInverse"
+            style="@style/CalculatorButton"/>
+        <Button
+            android:text="x²"
+            android:id="@+id/btnSquare"
+            android:backgroundTint="?attr/colorPrimaryInverse"
+            style="@style/CalculatorButton"/>
+        <Button
+            android:text="/"
+            android:id="@+id/btnDivide"
+            android:backgroundTint="?attr/colorPrimaryInverse"
+            style="@style/CalculatorButton"/>
+
+        <!-- Row 3 -->
+        <Button
+            android:text="7"
+            android:id="@+id/btn7"
+            android:backgroundTint="?attr/colorOnSecondary"
+            style="@style/CalculatorButton"/>
+        <Button
+            android:text="8"
+            android:id="@+id/btn8"
+            android:backgroundTint="?attr/colorOnSecondary"
+            style="@style/CalculatorButton"/>
+        <Button
+            android:text="9"
+            android:id="@+id/btn9"
+            android:backgroundTint="?attr/colorOnSecondary"
+            style="@style/CalculatorButton"/>
+        <Button
+            android:text="*"
+            android:id="@+id/btnMultiply"
+            android:backgroundTint="?attr/colorPrimaryInverse"
+            style="@style/CalculatorButton"/>
+
+        <!-- Row 4 -->
+        <Button
+            android:text="4"
+            android:id="@+id/btn4"
+            android:backgroundTint="?attr/colorOnSecondary"
+            style="@style/CalculatorButton"/>
+        <Button
+            android:text="5"
+            android:id="@+id/btn5"
+            android:backgroundTint="?attr/colorOnSecondary"
+            style="@style/CalculatorButton"/>
+        <Button
+            android:text="6"
+            android:id="@+id/btn6"
+            android:backgroundTint="?attr/colorOnSecondary"
+            style="@style/CalculatorButton"/>
+        <Button
+            android:text="+"
+            android:id="@+id/btnPlus"
+            android:backgroundTint="?attr/colorPrimaryInverse"
+            style="@style/CalculatorButton"/>
+
+        <!-- Row 5 -->
+        <Button
+            android:text="1"
+            android:id="@+id/btn1"
+            android:backgroundTint="?attr/colorOnSecondary"
+            style="@style/CalculatorButton"/>
+        <Button
+            android:text="2"
+            android:id="@+id/btn2"
+            android:backgroundTint="?attr/colorOnSecondary"
+            style="@style/CalculatorButton"/>
+        <Button
+            android:text="3"
+            android:id="@+id/btn3"
+            android:backgroundTint="?attr/colorOnSecondary"
+            style="@style/CalculatorButton"/>
+        <Button
+            android:text="-"
+            android:id="@+id/btnMinus"
+            android:backgroundTint="?attr/colorPrimaryInverse"
+            style="@style/CalculatorButton"/>
+        <!-- Row 6 -->
+        <Button
+            android:text="0"
+            android:id="@+id/btn0"
+            android:layout_columnSpan="2"
+            android:backgroundTint="?attr/colorOnSecondary"
+            style="@style/CalculatorButton"/>
+        <Button
+            android:text="."
+            android:id="@+id/btnDot"
+            android:backgroundTint="?attr/colorOnSecondary"
+            style="@style/CalculatorButton"/>
+        <Button
+            android:text="="
+            android:id="@+id/btnEquals"
+            android:backgroundTint="?attr/colorPrimaryInverse"
+            style="@style/CalculatorButton"/>
+    </GridLayout>
+
+</LinearLayout>
