@@ -19,21 +19,42 @@
             android:layout_height="wrap_content"
             android:paddingEnd="16dp"
             android:paddingStart="16dp"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:gravity="end|bottom" />
 
-        <EditText
-            android:id="@+id/numDisplay"
+        <HorizontalScrollView
+            android:id="@+id/numDisplayScrollView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:fillViewport="true">
+
+            <EditText
+                android:id="@+id/numDisplay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:textSize="35sp"
+                android:gravity="end|bottom"
+                android:background="@null"
+                android:inputType="none"
+                android:cursorVisible="true"
+                android:focusableInTouchMode="true"
+                android:scrollHorizontally="true"
+                android:singleLine="true"/>
+
+        </HorizontalScrollView>
+
+        <TextView
+            android:id="@+id/intermediateResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:textSize="40sp"
             android:gravity="end|bottom"
-            android:background="@null"
-            android:inputType="none"
-            android:cursorVisible="true"
-            android:focusableInTouchMode="true"/>
+            />
     </LinearLayout>
 
     <!-- Buttons -->
@@ -52,12 +73,12 @@
             android:backgroundTint="?attr/colorPrimaryInverse"
             style="@style/CalculatorButtonLandscape"/>
         <Button
-            android:text="rad"
+            android:text="RAD"
             android:id="@+id/btnRad"
             android:backgroundTint="?attr/colorPrimaryInverse"
             style="@style/CalculatorButtonLandscape"/>
         <Button
-            android:text="deg"
+            android:text="DEG"
             android:id="@+id/btnDeg"
             android:backgroundTint="?attr/colorPrimaryInverse"
             style="@style/CalculatorButtonLandscape"/>
@@ -72,7 +93,7 @@
             android:backgroundTint="?attr/colorPrimaryInverse"
             style="@style/CalculatorButtonLandscape"/>
         <Button
-            android:text="÷"
+            android:text="/"
             android:id="@+id/btnDivide"
             android:backgroundTint="?attr/colorPrimaryInverse"
             style="@style/CalculatorButtonLandscape"/>
@@ -94,7 +115,7 @@
             android:backgroundTint="?attr/colorPrimaryInverse"
             style="@style/CalculatorButtonLandscape"/>
         <Button
-            android:text="inv"
+            android:text="INV"
             android:id="@+id/btnInv"
             android:backgroundTint="?attr/colorPrimaryInverse"
             style="@style/CalculatorButtonLandscape"/>
