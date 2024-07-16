@@ -2,7 +2,7 @@
 
 ![Calculator Logo](screenshots/logo.webp)
 
-A comprehensive scientific calculator Android application with a user-friendly interface and advanced mathematical functions.
+A comprehensive scientific calculator Android application with a user-friendly interface and advanced mathematical functions. Also my second project after Splash Wallpaper, revamped completely.
 
 ## 🌟Features
 
