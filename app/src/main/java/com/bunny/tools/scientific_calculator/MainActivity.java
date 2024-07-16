@@ -1,11 +1,14 @@
 package com.bunny.tools.scientific_calculator;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
-import android.text.InputType;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
@@ -22,6 +25,7 @@ import androidx.core.view.WindowInsetsCompat;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -39,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private boolean isInverseMode = false;
     private static final String KEY_IS_RADIAN_MODE = "isRadianMode";
     private HorizontalScrollView numDisplayScrollView;
+    private int cursorPosition = 0;
 
 
     private static final Set<String> FUNCTIONS = new HashSet<>(Arrays.asList(
@@ -67,20 +72,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         updateDisplay();
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void initializeViews() {
         lastDisplay = findViewById(R.id.lastDisplay);
         numDisplay = findViewById(R.id.numDisplay);
         intermediateResult = findViewById(R.id.intermediateResult);
         numDisplayScrollView = findViewById(R.id.numDisplayScrollView);
 
-        numDisplay.setOnClickListener(v -> numDisplay.setSelection(numDisplay.getText().length()));
 
         if (numDisplay != null) {
-            numDisplay.setInputType(InputType.TYPE_NULL);
             numDisplay.setCursorVisible(true);
-            numDisplay.setFocusableInTouchMode(true);
             numDisplay.requestFocus();
+            numDisplay.setSelection(numDisplay.getText().length());
+            numDisplay.setShowSoftInputOnFocus(false);
+
+            // Handle touch events to maintain cursor visibility and prevent default keyboard behavior
+            numDisplay.setOnTouchListener((v, event) -> {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    v.requestFocus();
+                    numDisplay.setCursorVisible(true);
+                    // Allow the system to handle the cursor position
+                    return false;
+                }
+                return false;
+            });
+            numDisplay.setOnClickListener(null);
         }
+
 
         Button radButton = findViewById(R.id.btnRad);
         Button degButton = findViewById(R.id.btnDeg);
@@ -114,6 +132,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            View v = getCurrentFocus();
+            if (v instanceof EditText) {
+                hideKeyboard(v);
+            }
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
+    private void hideKeyboard(View view) {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
+    @Override
     public void onClick(View view) {
         if (!(view instanceof Button)) {
             return;
@@ -121,6 +157,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Button button = (Button) view;
         String buttonText = button.getText().toString();
+
+        // Get current cursor position
+        cursorPosition = numDisplay.getSelectionStart();
 
         int id = button.getId();
         if (id == R.id.btnRad || id == R.id.btnDeg) {
@@ -183,6 +222,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 appendToInput(buttonText);
                 break;
         }
+
         updateDisplay();
     }
 
@@ -192,12 +232,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         lastResult = BigDecimal.ZERO;
         lastDisplay.setText("");
         intermediateResult.setText("");
+        cursorPosition = 0;
         updateDisplay();
     }
 
     private void deleteLastChar() {
-        if (currentInput.length() > 0) {
-            currentInput.deleteCharAt(currentInput.length() - 1);
+        if (currentInput.length() > 0 && cursorPosition > 0) {
+            currentInput.deleteCharAt(cursorPosition - 1);
+            cursorPosition--;
             updateDisplay();
         }
     }
@@ -216,24 +258,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             currentInput.setLength(0);
             currentInput.append(formattedResult);
             intermediateResult.setText("");
+            cursorPosition = formattedResult.length();
         } catch (Exception e) {
             numDisplay.setText(R.string.error);
             scrollNumDisplayToEnd();
             intermediateResult.setText("");
+            cursorPosition = 0;
         }
+        updateDisplay();
     }
 
     private void handleOperator(String operator) {
         if (currentInput.length() > 0) {
-            char lastChar = currentInput.charAt(currentInput.length() - 1);
-            if (Character.isDigit(lastChar) || lastChar == ')' || lastChar == 'π' || lastChar == 'e' || lastChar == '²' || lastChar == '%') {
-                currentInput.append(operator);
-            } else if (isOperator(lastChar) && !operator.equals("²")) {
-                // Replace the last operator, unless it's '²' or '%'
-                currentInput.setCharAt(currentInput.length() - 1, operator.charAt(0));
+            char charBeforeCursor = cursorPosition > 0 ? currentInput.charAt(cursorPosition - 1) : ' ';
+            char charAtCursor = cursorPosition < currentInput.length() ? currentInput.charAt(cursorPosition) : ' ';
+
+            if (Character.isDigit(charBeforeCursor) || charBeforeCursor == ')' || charBeforeCursor == 'π' || charBeforeCursor == 'e' || charBeforeCursor == '²' || charBeforeCursor == '%') {
+                currentInput.insert(cursorPosition, operator);
+                cursorPosition += operator.length();
+            } else if (isOperator(charBeforeCursor) && !operator.equals("²")) {
+                // Replace the operator before the cursor, unless it's '²' or '%'
+                currentInput.setCharAt(cursorPosition - 1, operator.charAt(0));
+            } else if (isOperator(charAtCursor) && !operator.equals("²")) {
+                // Replace the operator at the cursor, unless it's '²' or '%'
+                currentInput.setCharAt(cursorPosition, operator.charAt(0));
+                cursorPosition++;
+            } else {
+                // Insert the operator at the cursor position
+                currentInput.insert(cursorPosition, operator);
+                cursorPosition += operator.length();
             }
         } else if (lastResult.compareTo(BigDecimal.ZERO) != 0 && !operator.equals("²")) {
-            currentInput.append(formatNumber(lastResult)).append(operator);
+            currentInput.insert(cursorPosition, formatNumber(lastResult) + operator);
+            cursorPosition += formatNumber(lastResult).length() + operator.length();
         }
         lastOperation = operator;
         updateDisplay();
@@ -245,49 +302,71 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void handleFunction(String actualFunction) {
         if (currentInput.length() > 0) {
-            char lastChar = currentInput.charAt(currentInput.length() - 1);
-            if (Character.isDigit(lastChar) || lastChar == ')' || lastChar == 'π' || lastChar == 'e') {
-                currentInput.append("×");
+            char charBeforeCursor = cursorPosition > 0 ? currentInput.charAt(cursorPosition - 1) : ' ';
+            if (Character.isDigit(charBeforeCursor) || charBeforeCursor == ')' || charBeforeCursor == 'π' || charBeforeCursor == 'e' || charBeforeCursor == '%') {
+                currentInput.insert(cursorPosition, "×");
+                cursorPosition++;
             }
         }
 
-
-        currentInput.append(actualFunction);
+        currentInput.insert(cursorPosition, actualFunction);
+        cursorPosition += actualFunction.length();
         if (!actualFunction.equals("^2") && !actualFunction.equals("10^") && !actualFunction.equals("e^")) {
-            currentInput.append("(");
+            currentInput.insert(cursorPosition, "(");
+            cursorPosition++;
         }
         updateDisplay();
     }
 
     private void handleConstant(String constant) {
         if (currentInput.length() > 0) {
-            char lastChar = currentInput.charAt(currentInput.length() - 1);
-            if (Character.isDigit(lastChar) || lastChar == ')' || lastChar == 'π' || lastChar == 'e') {
-                currentInput.append("*");
+            char charBeforeCursor = cursorPosition > 0 ? currentInput.charAt(cursorPosition - 1) : ' ';
+            if (Character.isDigit(charBeforeCursor) || charBeforeCursor == ')' || charBeforeCursor == 'π' || charBeforeCursor == 'e') {
+                currentInput.insert(cursorPosition, "×");
+                cursorPosition++;
             }
         }
-        currentInput.append(constant);
+        currentInput.insert(cursorPosition, constant);
+        cursorPosition += constant.length();
         Log.d("Calculator", "Current input after adding constant: " + currentInput.toString());
         updateDisplay();
     }
 
     private void handleFactorial() {
         if (currentInput.length() > 0) {
-            currentInput.append("!");
+            currentInput.insert(cursorPosition, "!");
+            cursorPosition++;
         }
         updateDisplay();
     }
 
     private void appendToInput(String value) {
-        if (currentInput.length() > 0) {
-            char lastChar = currentInput.charAt(currentInput.length() - 1);
-            if ((Character.isDigit(lastChar) || lastChar == 'π' || lastChar == 'e' || lastChar == ')') &&
-                    (value.equals("(") || value.equals("π") || value.equals("e") ||
-                            FUNCTIONS.contains(value))) {
-                currentInput.append("×");
+        if (value.equals("(")) {
+            if (cursorPosition > 0) {
+                char charBeforeCursor = currentInput.charAt(cursorPosition - 1);
+                if (Character.isDigit(charBeforeCursor) || charBeforeCursor == 'π' || charBeforeCursor == 'e' || charBeforeCursor == ')' || charBeforeCursor == '%' || charBeforeCursor == '²') {
+                    currentInput.insert(cursorPosition, "×");
+                    cursorPosition++;
+                }
             }
+            currentInput.insert(cursorPosition, value);
+            cursorPosition++;
+        } else {
+            if (currentInput.length() > 0 && cursorPosition > 0) {
+                char charBeforeCursor = currentInput.charAt(cursorPosition - 1);
+                if ((Character.isDigit(charBeforeCursor) || charBeforeCursor == 'π' || charBeforeCursor == 'e' || charBeforeCursor == ')' || charBeforeCursor == '%' || charBeforeCursor == '²') &&
+                        (value.equals("π") || value.equals("e") || FUNCTIONS.contains(value))) {
+                    currentInput.insert(cursorPosition, "×");
+                    cursorPosition++;
+                }else if (charBeforeCursor == '%' && Character.isDigit(value.charAt(0))) {
+                    // Insert "×" when a number follows "%"
+                    currentInput.insert(cursorPosition, "×");
+                    cursorPosition++;
+                }
+            }
+            currentInput.insert(cursorPosition, value);
+            cursorPosition += value.length();
         }
-        currentInput.append(value);
         updateDisplay();
     }
 
@@ -362,6 +441,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void updateDisplay() {
         String displayText = currentInput.toString();
         numDisplay.setText(displayText);
+        numDisplay.setSelection(cursorPosition);
         scrollNumDisplayToEnd();
         updateIntermediateResult();
     }
@@ -405,13 +485,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         boolean containsConstant = expression.contains("π") || expression.contains("e");
 
         // Check if the expression ends with a number, constant, closed parenthesis, or percentage
-        boolean endsCorrectly = expression.matches(".*[0-9πe)%]$") || expression.endsWith("²");
+        boolean endsCorrectly = expression.matches(".*[0-9πe)%!]$") || expression.endsWith("²");
 
         return (containsOperatorOrFunction || containsConstant) && endsCorrectly;
     }
 
+    private String formatLargeNumber(BigDecimal number) {
+        String plainString = number.stripTrailingZeros().toPlainString();
+        if (plainString.replace(".", "").length() > 20) {
+            // Convert to scientific notation
+            return String.format(Locale.getDefault(), "%.15E", number.doubleValue());
+        } else {
+            return plainString;
+        }
+    }
+
     private String formatNumber(BigDecimal number) {
-        if (number.stripTrailingZeros().scale() <= 0) {
+        if (number.abs().compareTo(new BigDecimal("1E20")) >= 0 ||
+                (number.abs().compareTo(new BigDecimal("1E-20")) > 0 && number.abs().compareTo(BigDecimal.ONE) < 0)) {
+            return formatLargeNumber(number);
+        } else if (number.stripTrailingZeros().scale() <= 0) {
             return number.toBigInteger().toString();
         } else {
             return number.stripTrailingZeros().toPlainString();

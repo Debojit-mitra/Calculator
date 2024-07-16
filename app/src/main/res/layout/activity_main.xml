@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
@@ -13,39 +12,42 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="vertical"
-        android:gravity="bottom">
+        android:gravity="bottom"
+        android:orientation="vertical">
+
         <TextView
             android:id="@+id/lastDisplay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="end|bottom"
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
-            android:textSize="26sp"
-            android:gravity="end|bottom" />
+            android:textSize="26sp" />
 
         <HorizontalScrollView
             android:id="@+id/numDisplayScrollView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:scrollbars="none"
-            android:fillViewport="true">
+            android:fillViewport="true"
+            android:scrollbars="none">
 
             <EditText
                 android:id="@+id/numDisplay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:textSize="50sp"
-                android:gravity="end|bottom"
+                android:autofillHints="none"
                 android:background="@null"
-                android:inputType="none"
-                android:textIsSelectable="true"
                 android:cursorVisible="true"
                 android:focusableInTouchMode="true"
+                android:gravity="end|bottom"
+                android:inputType="text"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
                 android:scrollHorizontally="true"
-                android:singleLine="true"/>
+                android:singleLine="true"
+                android:textIsSelectable="true"
+                android:textSize="50sp"
+                tools:ignore="LabelFor" />
 
         </HorizontalScrollView>
 
@@ -53,150 +55,166 @@
             android:id="@+id/intermediateResult"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="26sp"
+            android:gravity="end|bottom"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:gravity="end|bottom"
-            />
+            android:textSize="26sp" />
 
     </LinearLayout>
     <!-- Buttons -->
     <GridLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="10dp"
+        android:layout_gravity="center"
         android:columnCount="4"
-        android:rowCount="5"
-        android:layout_gravity="center">
+        android:padding="10dp"
+        android:rowCount="5">
 
         <!-- Row 1 -->
         <Button
-            android:text="AC"
             android:id="@+id/btnAc"
+            style="@style/CalculatorButton"
             android:backgroundTint="?attr/colorTertiaryContainer"
-            style="@style/CalculatorButton"/>
+            android:text="@string/ac" />
+
         <Button
-            android:text="("
             android:id="@+id/btnParenthesesFirst"
+            style="@style/CalculatorButton"
+            android:backgroundTint="?attr/colorOnSecondary"
             android:elevation="8dp"
-            android:backgroundTint="?attr/colorOnSecondary"
-            style="@style/CalculatorButton"/>
+            android:text="@string/ParenthesesFirst" />
+
         <Button
-            android:text=")"
             android:id="@+id/btnParenthesesSecond"
+            style="@style/CalculatorButton"
             android:backgroundTint="?attr/colorOnSecondary"
-            style="@style/CalculatorButton"/>
+            android:text="@string/ParenthesesSecond" />
+
         <Button
-            android:text="⌫"
             android:id="@+id/btnDel"
-            android:textSize="25sp"
+            style="@style/CalculatorButton"
             android:backgroundTint="?attr/colorTertiaryContainer"
-            style="@style/CalculatorButton"/>
+            android:text="@string/del"
+            android:textSize="25sp" />
 
         <!-- Row 2 -->
         <Button
-            android:text="%"
             android:id="@+id/btnPercentage"
+            style="@style/CalculatorButton"
             android:backgroundTint="?attr/colorPrimaryInverse"
-            style="@style/CalculatorButton"/>
+            android:text="@string/percentage" />
+
         <Button
-            android:text="√"
             android:id="@+id/btnRootOver"
+            style="@style/CalculatorButton"
             android:backgroundTint="?attr/colorPrimaryInverse"
-            style="@style/CalculatorButton"/>
+            android:text="@string/root_over" />
+
         <Button
-            android:text="x²"
             android:id="@+id/btnSquare"
+            style="@style/CalculatorButton"
             android:backgroundTint="?attr/colorPrimaryInverse"
-            style="@style/CalculatorButton"/>
+            android:text="@string/square" />
+
         <Button
-            android:text="/"
             android:id="@+id/btnDivide"
+            style="@style/CalculatorButton"
             android:backgroundTint="?attr/colorPrimaryInverse"
-            style="@style/CalculatorButton"/>
+            android:text="@string/divide" />
 
         <!-- Row 3 -->
         <Button
-            android:text="7"
             android:id="@+id/btn7"
+            style="@style/CalculatorButton"
             android:backgroundTint="?attr/colorOnSecondary"
-            style="@style/CalculatorButton"/>
+            android:text="@string/_7" />
+
         <Button
-            android:text="8"
             android:id="@+id/btn8"
+            style="@style/CalculatorButton"
             android:backgroundTint="?attr/colorOnSecondary"
-            style="@style/CalculatorButton"/>
+            android:text="@string/_8" />
+
         <Button
-            android:text="9"
             android:id="@+id/btn9"
+            style="@style/CalculatorButton"
             android:backgroundTint="?attr/colorOnSecondary"
-            style="@style/CalculatorButton"/>
+            android:text="@string/_9" />
+
         <Button
-            android:text="×"
             android:id="@+id/btnMultiply"
+            style="@style/CalculatorButton"
             android:backgroundTint="?attr/colorPrimaryInverse"
-            style="@style/CalculatorButton"/>
+            android:text="@string/multiply" />
 
         <!-- Row 4 -->
         <Button
-            android:text="4"
             android:id="@+id/btn4"
+            style="@style/CalculatorButton"
             android:backgroundTint="?attr/colorOnSecondary"
-            style="@style/CalculatorButton"/>
+            android:text="@string/_4" />
+
         <Button
-            android:text="5"
             android:id="@+id/btn5"
+            style="@style/CalculatorButton"
             android:backgroundTint="?attr/colorOnSecondary"
-            style="@style/CalculatorButton"/>
+            android:text="@string/_5" />
+
         <Button
-            android:text="6"
             android:id="@+id/btn6"
+            style="@style/CalculatorButton"
             android:backgroundTint="?attr/colorOnSecondary"
-            style="@style/CalculatorButton"/>
+            android:text="@string/_6" />
+
         <Button
-            android:text="+"
             android:id="@+id/btnPlus"
+            style="@style/CalculatorButton"
             android:backgroundTint="?attr/colorPrimaryInverse"
-            style="@style/CalculatorButton"/>
+            android:text="@string/plus" />
 
         <!-- Row 5 -->
         <Button
-            android:text="1"
             android:id="@+id/btn1"
+            style="@style/CalculatorButton"
             android:backgroundTint="?attr/colorOnSecondary"
-            style="@style/CalculatorButton"/>
+            android:text="@string/_1" />
+
         <Button
-            android:text="2"
             android:id="@+id/btn2"
+            style="@style/CalculatorButton"
             android:backgroundTint="?attr/colorOnSecondary"
-            style="@style/CalculatorButton"/>
+            android:text="@string/_2" />
+
         <Button
-            android:text="3"
             android:id="@+id/btn3"
+            style="@style/CalculatorButton"
             android:backgroundTint="?attr/colorOnSecondary"
-            style="@style/CalculatorButton"/>
+            android:text="@string/_3" />
+
         <Button
-            android:text="-"
             android:id="@+id/btnMinus"
+            style="@style/CalculatorButton"
             android:backgroundTint="?attr/colorPrimaryInverse"
-            style="@style/CalculatorButton"/>
+            android:text="@string/minus" />
         <!-- Row 6 -->
         <Button
-            android:text="0"
             android:id="@+id/btn0"
+            style="@style/CalculatorButton"
             android:layout_columnSpan="2"
             android:backgroundTint="?attr/colorOnSecondary"
-            style="@style/CalculatorButton"/>
+            android:text="@string/_0" />
+
         <Button
-            android:text="."
             android:id="@+id/btnDot"
+            style="@style/CalculatorButton"
             android:backgroundTint="?attr/colorOnSecondary"
-            style="@style/CalculatorButton"/>
+            android:text="@string/dot" />
+
         <Button
-            android:text="="
             android:id="@+id/btnEquals"
+            style="@style/CalculatorButton"
             android:backgroundTint="?attr/colorPrimaryInverse"
-            style="@style/CalculatorButton"/>
+            android:text="@string/equals" />
     </GridLayout>
 
 </LinearLayout>

@@ -1,7 +1,5 @@
 package com.bunny.tools.scientific_calculator;
 
-import android.util.Log;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -44,7 +42,7 @@ public class ExpressionEvaluator {
     }
 
     public static BigDecimal evaluateExpression(String expression) {
-        if (expression.contains("²")){
+        if (expression.contains("²")) {
             expression = expression.replace("²", "^2");
 
         }
@@ -55,36 +53,38 @@ public class ExpressionEvaluator {
 
     private static List<String> tokenize(String expression) {
         List<String> tokens = new ArrayList<>();
-        StringBuilder sb = new StringBuilder();
+        StringBuilder numberBuilder = new StringBuilder();
+        StringBuilder functionBuilder = new StringBuilder();
 
         for (int i = 0; i < expression.length(); i++) {
             char c = expression.charAt(i);
             if (Character.isDigit(c) || c == '.') {
-                sb.append(c);
+                numberBuilder.append(c);
             } else if (c == 'π' || c == 'e') {
-                if (sb.length() > 0) {
-                    tokens.add(sb.toString());
-                    sb.setLength(0);
+                if (numberBuilder.length() > 0) {
+                    tokens.add(numberBuilder.toString());
+                    numberBuilder.setLength(0);
                 }
                 tokens.add(String.valueOf(c));
             } else {
-                if (sb.length() > 0) {
-                    tokens.add(sb.toString());
-                    sb.setLength(0);
+                if (numberBuilder.length() > 0) {
+                    tokens.add(numberBuilder.toString());
+                    numberBuilder.setLength(0);
                 }
                 if (c == '(' || c == ')' || c == '+' || c == '-' || c == '×' || c == '/' || c == '^' || c == '%' || c == '!' || c == '²') {
                     tokens.add(String.valueOf(c));
                 } else if (Character.isLetter(c) || c == '√') {
-                    String func = String.valueOf(c);
+                    functionBuilder.append(c);
                     while (i + 1 < expression.length() && Character.isLetter(expression.charAt(i + 1))) {
-                        func += expression.charAt(++i);
+                        functionBuilder.append(expression.charAt(++i));
                     }
-                    tokens.add(func);
+                    tokens.add(functionBuilder.toString());
+                    functionBuilder.setLength(0);
                 }
             }
         }
-        if (sb.length() > 0) {
-            tokens.add(sb.toString());
+        if (numberBuilder.length() > 0) {
+            tokens.add(numberBuilder.toString());
         }
         return tokens;
     }
@@ -93,9 +93,15 @@ public class ExpressionEvaluator {
         List<String> postfix = new ArrayList<>();
         Stack<String> stack = new Stack<>();
 
-        for (String token : infix) {
+        for (int i = 0; i < infix.size(); i++) {
+            String token = infix.get(i);
             if (isNumber(token)) {
                 postfix.add(token);
+                // Check if the next token is a percentage
+                if (i + 1 < infix.size() && infix.get(i + 1).equals("%")) {
+                    postfix.add("%");
+                    i++; // Skip the percentage symbol in the next iteration
+                }
             } else if (FUNCTIONS.containsKey(token) || token.equals("²")) {
                 stack.push(token);
             } else if (token.equals("(")) {
@@ -131,53 +137,54 @@ public class ExpressionEvaluator {
         return postfix;
     }
 
-    static Stack<String> operatorStack = new Stack<>(); //putting this inside evaluatePostfix creates problems
 
     private static BigDecimal evaluatePostfix(List<String> postfix) {
         Stack<BigDecimal> stack = new Stack<>();
+        BigDecimal lastPercentage = null;
 
         for (String token : postfix) {
             if (isNumber(token)) {
-                if (token.equals("π")) {
-                    stack.push(BigDecimal.valueOf(Math.PI));
-                } else if (token.equals("e")) {
-                    stack.push(BigDecimal.valueOf(Math.E));
-                } else {
-                    stack.push(new BigDecimal(token));
-                }
+                stack.push(new BigDecimal(token));
+                lastPercentage = null;
+            } else if (token.equals("π")) {
+                stack.push(BigDecimal.valueOf(Math.PI));
+                lastPercentage = null;
+            } else if (token.equals("e")) {
+                stack.push(BigDecimal.valueOf(Math.E));
+                lastPercentage = null;
             } else if (FUNCTIONS.containsKey(token)) {
                 BigDecimal operand = stack.pop();
                 stack.push(Objects.requireNonNull(FUNCTIONS.get(token)).apply(operand));
+                lastPercentage = null;
             } else if (token.equals("²")) {
                 BigDecimal operand = stack.pop();
                 stack.push(operand.pow(2));
+                lastPercentage = null;
             } else if (token.equals("!")) {
                 int operand = stack.pop().intValue();
                 stack.push(BigDecimal.valueOf(factorial(operand)));
+                lastPercentage = null;
             } else if (token.equals("%")) {
                 BigDecimal operand = stack.pop();
-                BigDecimal percentValue = operand.divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP);
-                if (!stack.isEmpty() && !operatorStack.isEmpty() &&
-                        (operatorStack.peek().equals("+") || operatorStack.peek().equals("-"))) {
-
-                    BigDecimal base = stack.pop();
-                    stack.push(base);
-
-                    stack.push(base.multiply(percentValue));
-                } else {
-                    stack.push(percentValue);
-                }
+                lastPercentage = operand.divide(BigDecimal.valueOf(100), 10, RoundingMode.HALF_UP);
+                stack.push(lastPercentage);
             } else {
-                operatorStack.push(token);
-                Log.e("here else operatorStack", "operatorStack: "+operatorStack);
                 BigDecimal b = stack.pop();
-                BigDecimal a = stack.isEmpty() ? BigDecimal.ZERO : stack.pop();
+                BigDecimal a = stack.pop();
                 switch (token) {
                     case "+":
-                        stack.push(a.add(b));
+                        if (b.equals(lastPercentage)) {
+                            stack.push(a.add(a.multiply(b)));
+                        } else {
+                            stack.push(a.add(b));
+                        }
                         break;
                     case "-":
-                        stack.push(a.subtract(b));
+                        if (b.equals(lastPercentage)) {
+                            stack.push(a.subtract(a.multiply(b)));
+                        } else {
+                            stack.push(a.subtract(b));
+                        }
                         break;
                     case "×":
                         stack.push(a.multiply(b));
@@ -191,12 +198,12 @@ public class ExpressionEvaluator {
                         stack.push(BigDecimal.valueOf(Math.pow(a.doubleValue(), b.doubleValue())));
                         break;
                 }
+                lastPercentage = null;
             }
         }
 
         return stack.pop();
     }
-
 
     private static boolean isNumber(String token) {
         return token.equals("π") || token.equals("e") || token.matches("-?\\d*\\.?\\d+");
