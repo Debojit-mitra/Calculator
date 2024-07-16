@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
@@ -7,8 +8,21 @@
     android:gravity="bottom"
     android:orientation="vertical"
     tools:context=".MainActivity">
+
+    <ImageView
+        android:id="@+id/btnHistory"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:contentDescription="@string/btn_history"
+        android:src="@drawable/ic_round_history"
+        app:tint="?attr/colorOnSurface"
+        android:layout_margin="15dp"
+        android:layout_gravity="start"
+        android:background="@drawable/round_ripple"
+        />
     <!-- Display -->
     <LinearLayout
+        android:id="@+id/displayLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -61,6 +75,22 @@
             android:textSize="26sp" />
 
     </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/historyRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/noHistoryTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/no_history"
+        android:visibility="gone" />
+
     <!-- Buttons -->
     <GridLayout
         android:layout_width="match_parent"

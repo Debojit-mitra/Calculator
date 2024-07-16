@@ -16,7 +16,9 @@ A comprehensive scientific calculator Android application with a user-friendly i
 - Factorial calculations
 - Real-time expression evaluation
 - Landscape mode for additional functions
+- Calculation history
 - Dynamic Colors
+- App Updater
 
 ## 📱Screenshots
 

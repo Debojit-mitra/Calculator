@@ -2,17 +2,26 @@ package com.bunny.tools.scientific_calculator;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.ColorInt;
@@ -21,20 +30,27 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.bunny.tools.scientific_calculator.updater.AppUpdater;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private TextView lastDisplay, intermediateResult;
+    private TextView lastDisplay, intermediateResult, noHistoryTextView;
     private EditText numDisplay;
     private StringBuilder currentInput;
     private String lastOperation;
     private BigDecimal lastResult;
+    private LinearLayout displayLayout;
     private static final String KEY_CURRENT_INPUT = "currentInput";
     private static final String KEY_LAST_OPERATION = "lastOperation";
     private static final String KEY_LAST_RESULT = "lastResult";
@@ -44,7 +60,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final String KEY_IS_RADIAN_MODE = "isRadianMode";
     private HorizontalScrollView numDisplayScrollView;
     private int cursorPosition = 0;
-
+    //history
+    private RecyclerView historyRecyclerView;
+    private HistoryAdapter historyAdapter;
+    private List<String> calculationHistory;
+    private static final int MAX_HISTORY_SIZE = 5;
+    private static final String PREF_CALCULATION_HISTORY = "calculationHistory";
+    private AppUpdater appUpdater;
+    public AppUpdater.UpdateReceiver updateReceiver;
+    public static final int REQUEST_INSTALL_PACKAGES = 1001;
 
     private static final Set<String> FUNCTIONS = new HashSet<>(Arrays.asList(
             "sin", "cos", "tan", "log", "ln", "√", "asin", "acos", "atan"
@@ -62,23 +86,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
 
         initializeViews();
+        initializeHistoryView();
         if (savedInstanceState != null) {
             restoreState(savedInstanceState);
         } else {
             currentInput = new StringBuilder();
             lastOperation = "";
             lastResult = BigDecimal.ZERO;
+            loadHistoryFromPreferences();  // Load history here
         }
         updateDisplay();
     }
 
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint({"ClickableViewAccessibility", "UnspecifiedRegisterReceiverFlag"})
     private void initializeViews() {
+        appUpdater = new AppUpdater(MainActivity.this);
         lastDisplay = findViewById(R.id.lastDisplay);
         numDisplay = findViewById(R.id.numDisplay);
         intermediateResult = findViewById(R.id.intermediateResult);
         numDisplayScrollView = findViewById(R.id.numDisplayScrollView);
 
+        noHistoryTextView = findViewById(R.id.noHistoryTextView);
+        displayLayout = findViewById(R.id.displayLayout);
+
+        ImageView btnHistory = findViewById(R.id.btnHistory);
+        if (btnHistory != null) {
+            btnHistory.setOnClickListener(v -> toggleHistoryView());
+        } else {
+            Log.e("MainActivity", "btnHistory not found in layout");
+        }
 
         if (numDisplay != null) {
             numDisplay.setCursorVisible(true);
@@ -86,19 +122,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             numDisplay.setSelection(numDisplay.getText().length());
             numDisplay.setShowSoftInputOnFocus(false);
 
-            // Handle touch events to maintain cursor visibility and prevent default keyboard behavior
             numDisplay.setOnTouchListener((v, event) -> {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     v.requestFocus();
                     numDisplay.setCursorVisible(true);
-                    // Allow the system to handle the cursor position
                     return false;
                 }
                 return false;
             });
             numDisplay.setOnClickListener(null);
         }
-
 
         Button radButton = findViewById(R.id.btnRad);
         Button degButton = findViewById(R.id.btnDeg);
@@ -129,6 +162,53 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.e("MainActivity", "Button not found: " + getResources().getResourceEntryName(id));
             }
         }
+
+        updateReceiver = new AppUpdater.UpdateReceiver();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(updateReceiver, new IntentFilter(AppUpdater.INSTALL_ACTION), RECEIVER_NOT_EXPORTED);
+        } else {
+            registerReceiver(updateReceiver, new IntentFilter(AppUpdater.INSTALL_ACTION));
+        }
+        appUpdater.checkForUpdates(false);
+    }
+
+    private void initializeHistoryView() {
+        historyRecyclerView = findViewById(R.id.historyRecyclerView);
+        historyRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        calculationHistory = new ArrayList<>();
+        historyAdapter = new HistoryAdapter(calculationHistory, this::onHistoryItemClick);
+        historyRecyclerView.setAdapter(historyAdapter);
+    }
+
+    private void toggleHistoryView() {
+        if (displayLayout.getVisibility() == View.VISIBLE) {
+            fadeOutView(displayLayout, () -> {
+                displayLayout.setVisibility(View.GONE);
+                updateHistoryVisibility();
+                historyRecyclerView.smoothScrollToPosition(0);
+            });
+        } else {
+            View viewToFadeOut = calculationHistory.isEmpty() ? noHistoryTextView : historyRecyclerView;
+            fadeOutView(viewToFadeOut, () -> {
+                historyRecyclerView.setVisibility(View.GONE);
+                noHistoryTextView.setVisibility(View.GONE);
+                fadeInView(displayLayout);
+                numDisplay.requestFocus();
+            });
+        }
+    }
+
+    private void onHistoryItemClick(String calculation) {
+        String[] parts = calculation.split("=");
+        if (parts.length == 2) {
+            currentInput = new StringBuilder(parts[0].trim());
+            String result = parts[1].trim();
+            numDisplay.setText(result);
+            intermediateResult.setText("");
+            cursorPosition = parts[0].trim().length();
+        }
+        toggleHistoryView();
+        updateDisplay();
     }
 
     @Override
@@ -249,9 +329,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             String expression = currentInput.toString();
             ExpressionEvaluator.setModes(isRadianMode, isInverseMode);
             BigDecimal result = ExpressionEvaluator.evaluateExpression(expression);
-            expression = expression + " =";
+            expression = expression + " = ";
             lastDisplay.setText(expression);
             String formattedResult = formatNumber(result);
+            String calculation = expression + formattedResult;
             numDisplay.setText(formattedResult);
             scrollNumDisplayToEnd();
             lastResult = result;
@@ -259,6 +340,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             currentInput.append(formattedResult);
             intermediateResult.setText("");
             cursorPosition = formattedResult.length();
+            // Add to history
+            addToHistory(calculation);
         } catch (Exception e) {
             numDisplay.setText(R.string.error);
             scrollNumDisplayToEnd();
@@ -267,6 +350,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         updateDisplay();
     }
+
+    private void addToHistory(String calculation) {
+        calculationHistory.add(0, calculation);
+        if (calculationHistory.size() > MAX_HISTORY_SIZE) {
+            calculationHistory.remove(calculationHistory.size() - 1);
+        }
+        historyAdapter.updateHistory(calculationHistory);
+        saveHistoryToPreferences();
+    }
+
+    private void updateHistoryVisibility() {
+        if (calculationHistory.isEmpty()) {
+            historyRecyclerView.setVisibility(View.GONE);
+            noHistoryTextView.setVisibility(View.VISIBLE);
+            displayLayout.setVisibility(View.INVISIBLE);
+        } else {
+            historyRecyclerView.setVisibility(View.VISIBLE);
+            noHistoryTextView.setVisibility(View.GONE);
+        }
+    }
+
 
     private void handleOperator(String operator) {
         if (currentInput.length() > 0) {
@@ -358,7 +462,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         (value.equals("π") || value.equals("e") || FUNCTIONS.contains(value))) {
                     currentInput.insert(cursorPosition, "×");
                     cursorPosition++;
-                }else if (charBeforeCursor == '%' && Character.isDigit(value.charAt(0))) {
+                } else if (charBeforeCursor == '%' && Character.isDigit(value.charAt(0))) {
                     // Insert "×" when a number follows "%"
                     currentInput.insert(cursorPosition, "×");
                     cursorPosition++;
@@ -520,6 +624,53 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
+    private void saveHistoryToPreferences() {
+        SharedPreferences prefs = getPreferences(MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putStringSet(PREF_CALCULATION_HISTORY, new HashSet<>(calculationHistory));
+        editor.apply();
+    }
+
+    private void fadeOutView(View view, Runnable onAnimationEnd) {
+        AlphaAnimation fadeOut = new AlphaAnimation(1.0f, 0.0f);
+        fadeOut.setDuration(250);
+        fadeOut.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                view.setVisibility(View.GONE);
+                if (onAnimationEnd != null) {
+                    onAnimationEnd.run();
+                }
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
+        view.startAnimation(fadeOut);
+    }
+
+    private void fadeInView(View view) {
+        view.setVisibility(View.VISIBLE);
+        AlphaAnimation fadeIn = new AlphaAnimation(0.0f, 1.0f);
+        fadeIn.setDuration(250);
+        view.startAnimation(fadeIn);
+    }
+
+
+    private void loadHistoryFromPreferences() {
+        SharedPreferences prefs = getPreferences(MODE_PRIVATE);
+        Set<String> savedHistory = prefs.getStringSet(PREF_CALCULATION_HISTORY, new HashSet<>());
+        calculationHistory = new ArrayList<>(savedHistory);
+        if (historyAdapter != null) {
+            historyAdapter.updateHistory(calculationHistory);
+        }
+    }
+
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -528,6 +679,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         outState.putString(KEY_LAST_OPERATION, lastOperation);
         outState.putString(KEY_LAST_RESULT, lastResult.toString());
         outState.putString(KEY_LAST_DISPLAY, lastDisplay.getText().toString());
+        outState.putStringArrayList(PREF_CALCULATION_HISTORY, new ArrayList<>(calculationHistory));
     }
 
     private void restoreState(Bundle savedInstanceState) {
@@ -536,5 +688,43 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         lastOperation = savedInstanceState.getString(KEY_LAST_OPERATION, "");
         lastResult = new BigDecimal(savedInstanceState.getString(KEY_LAST_RESULT, "0"));
         lastDisplay.setText(savedInstanceState.getString(KEY_LAST_DISPLAY, ""));
+        ArrayList<String> savedHistory = savedInstanceState.getStringArrayList(PREF_CALCULATION_HISTORY);
+        calculationHistory = savedHistory != null ? savedHistory : new ArrayList<>();
+        historyAdapter.updateHistory(calculationHistory);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_INSTALL_PACKAGES) {
+            if (hasInstallPermission()) {
+                Toast.makeText(this, "Permission to install packages granted", Toast.LENGTH_SHORT).show();
+                appUpdater.checkAndDownloadPendingUpdate();
+            } else {
+                Toast.makeText(this, "Permission to install packages is required for updates", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    private boolean hasInstallPermission() {
+        return getPackageManager().canRequestPackageInstalls();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        saveHistoryToPreferences();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        saveHistoryToPreferences();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(updateReceiver);
     }
 }

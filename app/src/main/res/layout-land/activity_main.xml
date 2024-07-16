@@ -1,14 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".MainActivity">
+
+    <ImageView
+        android:id="@+id/btnHistory"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:contentDescription="@string/btn_history"
+        android:src="@drawable/ic_round_history"
+        app:tint="?attr/colorOnSurface"
+        android:layout_margin="10dp"
+        android:layout_gravity="start"
+        android:elevation="5dp"
+        android:background="@drawable/round_ripple"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
     <!-- Display -->
     <LinearLayout
+        android:id="@+id/displayLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -59,6 +78,22 @@
             android:gravity="end|bottom"
             />
     </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/historyRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.6"
+        android:layout_marginStart="35dp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/noHistoryTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/no_history"
+        android:visibility="gone" />
 
     <!-- Buttons -->
     <GridLayout
@@ -252,4 +287,6 @@
             style="@style/CalculatorButtonLandscape"/>
 
     </GridLayout>
-</LinearLayout>
+
+    </LinearLayout>
+</FrameLayout>
