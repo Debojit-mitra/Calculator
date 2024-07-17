@@ -8,8 +8,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.provider.Settings;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -28,6 +32,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -102,9 +108,16 @@ public class AppUpdater {
     }
 
     private void showUpdateReadyDialog(String newVersion, String releaseNotes) {
+        // Format release notes
+        SpannableStringBuilder formattedReleaseNotes = formatReleaseNotes(releaseNotes);
+
         new MaterialAlertDialogBuilder(context)
                 .setTitle("Update Ready")
-                .setMessage("A new version (" + newVersion + ") is ready to install.\n\nRelease Notes:\n" + releaseNotes)
+                .setMessage(new SpannableStringBuilder()
+                        .append("A new version (")
+                        .append(newVersion)
+                        .append(") is ready to install.\n\nRelease Notes:\n")
+                        .append(formattedReleaseNotes))
                 .setCancelable(false)
                 .setPositiveButton("Install", (dialog, which) -> installExistingUpdate())
                 .setNegativeButton("Later", (dialog, which) -> dialog.dismiss())
@@ -164,13 +177,43 @@ public class AppUpdater {
     }
 
     private void showUpdateDialog(String newVersion, String downloadUrl, String releaseNotes) {
+        // Format release notes
+        SpannableStringBuilder formattedReleaseNotes = formatReleaseNotes(releaseNotes);
+
         new MaterialAlertDialogBuilder(context)
                 .setTitle("Update Available")
-                .setMessage("A new version (" + newVersion + ") is available.\n\nRelease Notes:\n" + releaseNotes)
+                .setMessage(new SpannableStringBuilder()
+                        .append("A new version (")
+                        .append(newVersion)
+                        .append(") is available.\n\nRelease Notes:\n")
+                        .append(formattedReleaseNotes))
                 .setCancelable(false)
                 .setPositiveButton("Update", (dialog, which) -> handleUpdateClick(newVersion, downloadUrl))
                 .setNegativeButton("Later", (dialog, which) -> dialog.dismiss())
                 .show();
+    }
+
+    private SpannableStringBuilder formatReleaseNotes(String releaseNotes) {
+        // Remove "### " prefix
+        releaseNotes = releaseNotes.replaceAll("^### ", "");
+
+        SpannableStringBuilder builder = new SpannableStringBuilder(releaseNotes);
+
+        // Make version number bold
+        Pattern versionPattern = Pattern.compile("^(v\\d+\\.\\d+\\.\\d+)");
+        Matcher versionMatcher = versionPattern.matcher(releaseNotes);
+        if (versionMatcher.find()) {
+            builder.setSpan(new StyleSpan(Typeface.BOLD), versionMatcher.start(), versionMatcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        // Make text in brackets bold
+        Pattern bracketPattern = Pattern.compile("\\(([^)]+)\\)");
+        Matcher bracketMatcher = bracketPattern.matcher(releaseNotes);
+        while (bracketMatcher.find()) {
+            builder.setSpan(new StyleSpan(Typeface.BOLD), bracketMatcher.start(), bracketMatcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        return builder;
     }
 
 

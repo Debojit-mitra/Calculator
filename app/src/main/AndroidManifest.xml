@@ -18,7 +18,10 @@
         <activity
             android:name=".MainActivity"
             android:theme="@style/SplashTheme"
-            android:exported="true">
+            android:resizeableActivity="false"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustPan"
+            android:exported="true"
+            tools:ignore="DiscouragedApi,NonResizeableActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -46,6 +46,14 @@ public class ExpressionEvaluator {
             expression = expression.replace("²", "^2");
 
         }
+
+        // Add closing parenthesis if missing
+        int openParenCount = (int) expression.chars().filter(ch -> ch == '(').count();
+        int closeParenCount = (int) expression.chars().filter(ch -> ch == ')').count();
+        if (openParenCount > closeParenCount) {
+            expression += ")".repeat(openParenCount - closeParenCount);
+        }
+
         List<String> tokens = tokenize(expression);
         List<String> postfix = infixToPostfix(tokens);
         return evaluatePostfix(postfix);
@@ -71,8 +79,15 @@ public class ExpressionEvaluator {
                     tokens.add(numberBuilder.toString());
                     numberBuilder.setLength(0);
                 }
-                if (c == '(' || c == ')' || c == '+' || c == '-' || c == '×' || c == '/' || c == '^' || c == '%' || c == '!' || c == '²') {
+                if (c == '(' || c == ')' || c == '+' || c == '×' || c == '/' || c == '^' || c == '%' || c == '!' || c == '²') {
                     tokens.add(String.valueOf(c));
+                } else if (c == '-') {
+                    // Check if it's a negative number or subtraction operator
+                    if (tokens.isEmpty() || "+-×/^(".contains(tokens.get(tokens.size() - 1))) {
+                        numberBuilder.append(c);
+                    } else {
+                        tokens.add(String.valueOf(c));
+                    }
                 } else if (Character.isLetter(c) || c == '√') {
                     functionBuilder.append(c);
                     while (i + 1 < expression.length() && Character.isLetter(expression.charAt(i + 1))) {
@@ -95,7 +110,7 @@ public class ExpressionEvaluator {
 
         for (int i = 0; i < infix.size(); i++) {
             String token = infix.get(i);
-            if (isNumber(token)) {
+            if (isNumber(token) || token.equals("π") || token.equals("e")) {
                 postfix.add(token);
                 // Check if the next token is a percentage
                 if (i + 1 < infix.size() && infix.get(i + 1).equals("%")) {
@@ -170,7 +185,7 @@ public class ExpressionEvaluator {
                 stack.push(lastPercentage);
             } else {
                 BigDecimal b = stack.pop();
-                BigDecimal a = stack.pop();
+                BigDecimal a = stack.isEmpty() ? BigDecimal.ZERO : stack.pop();
                 switch (token) {
                     case "+":
                         if (b.equals(lastPercentage)) {
@@ -206,7 +221,7 @@ public class ExpressionEvaluator {
     }
 
     private static boolean isNumber(String token) {
-        return token.equals("π") || token.equals("e") || token.matches("-?\\d*\\.?\\d+");
+        return token.matches("-?\\d*\\.?\\d+");
     }
 
     private static int factorial(int n) {
