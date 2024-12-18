@@ -20,6 +20,7 @@
         android:layout_gravity="start"
         android:background="@drawable/round_ripple"
         />
+
     <!-- Display -->
     <LinearLayout
         android:id="@+id/displayLayout"
@@ -36,6 +37,7 @@
             android:gravity="end|bottom"
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
+            android:textColor="?attr/colorOnSurface"
             android:textSize="26sp" />
 
         <HorizontalScrollView
@@ -59,6 +61,7 @@
                 android:paddingEnd="16dp"
                 android:scrollHorizontally="true"
                 android:singleLine="true"
+                android:textColor="?attr/colorOnSurface"
                 android:textIsSelectable="true"
                 android:textSize="50sp"
                 tools:ignore="LabelFor" />
@@ -72,6 +75,7 @@
             android:gravity="end|bottom"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
+            android:textColor="?attr/colorOnSurfaceVariant"
             android:textSize="26sp" />
 
     </LinearLayout>
@@ -92,6 +96,7 @@
         android:textAlignment="center"
         android:text="@string/no_history"
         android:textStyle="bold"
+        android:textColor="?attr/colorOnSurfaceVariant"
         android:textSize="15sp"
         android:visibility="gone" />
 
@@ -109,25 +114,29 @@
             android:id="@+id/btnAc"
             style="@style/CalculatorButton"
             android:backgroundTint="?attr/colorTertiaryContainer"
+            android:textColor="?attr/colorOnTertiaryContainer"
             android:text="@string/ac" />
 
         <Button
             android:id="@+id/btnParenthesesFirst"
             style="@style/CalculatorButton"
-            android:backgroundTint="?attr/colorOnSecondary"
+            android:backgroundTint="?attr/colorSecondaryContainer"
+            android:textColor="?attr/colorOnSecondaryContainer"
             android:elevation="8dp"
             android:text="@string/ParenthesesFirst" />
 
         <Button
             android:id="@+id/btnParenthesesSecond"
             style="@style/CalculatorButton"
-            android:backgroundTint="?attr/colorOnSecondary"
+            android:backgroundTint="?attr/colorSecondaryContainer"
+            android:textColor="?attr/colorOnSecondaryContainer"
             android:text="@string/ParenthesesSecond" />
 
         <Button
             android:id="@+id/btnDel"
             style="@style/CalculatorButton"
             android:backgroundTint="?attr/colorTertiaryContainer"
+            android:textColor="?attr/colorOnTertiaryContainer"
             android:text="@string/del"
             android:textSize="25sp" />
 
@@ -135,119 +144,139 @@
         <Button
             android:id="@+id/btnPercentage"
             style="@style/CalculatorButton"
-            android:backgroundTint="?attr/colorPrimaryInverse"
+            android:backgroundTint="?attr/colorPrimaryContainer"
+            android:textColor="?attr/colorOnPrimaryContainer"
             android:text="@string/percentage" />
 
         <Button
             android:id="@+id/btnRootOver"
             style="@style/CalculatorButton"
-            android:backgroundTint="?attr/colorPrimaryInverse"
+            android:backgroundTint="?attr/colorPrimaryContainer"
+            android:textColor="?attr/colorOnPrimaryContainer"
             android:text="@string/root_over" />
 
         <Button
             android:id="@+id/btnSquare"
             style="@style/CalculatorButton"
-            android:backgroundTint="?attr/colorPrimaryInverse"
+            android:backgroundTint="?attr/colorPrimaryContainer"
+            android:textColor="?attr/colorOnPrimaryContainer"
             android:text="@string/square" />
 
         <Button
             android:id="@+id/btnDivide"
             style="@style/CalculatorButton"
-            android:backgroundTint="?attr/colorPrimaryInverse"
+            android:backgroundTint="?attr/colorPrimaryContainer"
+            android:textColor="?attr/colorOnPrimaryContainer"
             android:text="@string/divide" />
 
         <!-- Row 3 -->
         <Button
             android:id="@+id/btn7"
             style="@style/CalculatorButton"
-            android:backgroundTint="?attr/colorOnSecondary"
+            android:backgroundTint="?attr/colorSecondaryContainer"
+            android:textColor="?attr/colorOnSecondaryContainer"
             android:text="@string/_7" />
 
         <Button
             android:id="@+id/btn8"
             style="@style/CalculatorButton"
-            android:backgroundTint="?attr/colorOnSecondary"
+            android:backgroundTint="?attr/colorSecondaryContainer"
+            android:textColor="?attr/colorOnSecondaryContainer"
             android:text="@string/_8" />
 
         <Button
             android:id="@+id/btn9"
             style="@style/CalculatorButton"
-            android:backgroundTint="?attr/colorOnSecondary"
+            android:backgroundTint="?attr/colorSecondaryContainer"
+            android:textColor="?attr/colorOnSecondaryContainer"
             android:text="@string/_9" />
 
         <Button
             android:id="@+id/btnMultiply"
             style="@style/CalculatorButton"
-            android:backgroundTint="?attr/colorPrimaryInverse"
+            android:backgroundTint="?attr/colorPrimaryContainer"
+            android:textColor="?attr/colorOnPrimaryContainer"
             android:text="@string/multiply" />
 
         <!-- Row 4 -->
         <Button
             android:id="@+id/btn4"
             style="@style/CalculatorButton"
-            android:backgroundTint="?attr/colorOnSecondary"
+            android:backgroundTint="?attr/colorSecondaryContainer"
+            android:textColor="?attr/colorOnSecondaryContainer"
             android:text="@string/_4" />
 
         <Button
             android:id="@+id/btn5"
             style="@style/CalculatorButton"
-            android:backgroundTint="?attr/colorOnSecondary"
+            android:backgroundTint="?attr/colorSecondaryContainer"
+            android:textColor="?attr/colorOnSecondaryContainer"
             android:text="@string/_5" />
 
         <Button
             android:id="@+id/btn6"
             style="@style/CalculatorButton"
-            android:backgroundTint="?attr/colorOnSecondary"
+            android:backgroundTint="?attr/colorSecondaryContainer"
+            android:textColor="?attr/colorOnSecondaryContainer"
             android:text="@string/_6" />
 
         <Button
             android:id="@+id/btnPlus"
             style="@style/CalculatorButton"
-            android:backgroundTint="?attr/colorPrimaryInverse"
+            android:backgroundTint="?attr/colorPrimaryContainer"
+            android:textColor="?attr/colorOnPrimaryContainer"
             android:text="@string/plus" />
 
         <!-- Row 5 -->
         <Button
             android:id="@+id/btn1"
             style="@style/CalculatorButton"
-            android:backgroundTint="?attr/colorOnSecondary"
+            android:backgroundTint="?attr/colorSecondaryContainer"
+            android:textColor="?attr/colorOnSecondaryContainer"
             android:text="@string/_1" />
 
         <Button
             android:id="@+id/btn2"
             style="@style/CalculatorButton"
-            android:backgroundTint="?attr/colorOnSecondary"
+            android:backgroundTint="?attr/colorSecondaryContainer"
+            android:textColor="?attr/colorOnSecondaryContainer"
             android:text="@string/_2" />
 
         <Button
             android:id="@+id/btn3"
             style="@style/CalculatorButton"
-            android:backgroundTint="?attr/colorOnSecondary"
+            android:backgroundTint="?attr/colorSecondaryContainer"
+            android:textColor="?attr/colorOnSecondaryContainer"
             android:text="@string/_3" />
 
         <Button
             android:id="@+id/btnMinus"
             style="@style/CalculatorButton"
-            android:backgroundTint="?attr/colorPrimaryInverse"
+            android:backgroundTint="?attr/colorPrimaryContainer"
+            android:textColor="?attr/colorOnPrimaryContainer"
             android:text="@string/minus" />
+
         <!-- Row 6 -->
         <Button
             android:id="@+id/btn0"
             style="@style/CalculatorButton"
             android:layout_columnSpan="2"
-            android:backgroundTint="?attr/colorOnSecondary"
+            android:backgroundTint="?attr/colorSecondaryContainer"
+            android:textColor="?attr/colorOnSecondaryContainer"
             android:text="@string/_0" />
 
         <Button
             android:id="@+id/btnDot"
             style="@style/CalculatorButton"
-            android:backgroundTint="?attr/colorOnSecondary"
+            android:backgroundTint="?attr/colorSecondaryContainer"
+            android:textColor="?attr/colorOnSecondaryContainer"
             android:text="@string/dot" />
 
         <Button
             android:id="@+id/btnEquals"
             style="@style/CalculatorButton"
-            android:backgroundTint="?attr/colorPrimaryInverse"
+            android:backgroundTint="?attr/colorPrimaryContainer"
+            android:textColor="?attr/colorOnPrimaryContainer"
             android:text="@string/equals" />
     </GridLayout>
 

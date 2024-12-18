@@ -4,14 +4,14 @@ plugins {
 
 android {
     namespace = "com.bunny.tools.scientific_calculator"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.bunny.tools.scientific_calculator"
         minSdk = 29
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
-        versionName = "1.0.3"
+        versionName = "1.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

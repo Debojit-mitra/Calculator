@@ -612,8 +612,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void setButtonColor(Button button, boolean isActive) {
         if (button != null) {
             @ColorInt int backgroundColor = isActive ?
-                    getThemeColor(com.google.android.material.R.attr.colorPrimaryContainer) :
-                    getThemeColor(com.google.android.material.R.attr.colorPrimaryInverse);
+                    getThemeColor(com.google.android.material.R.attr.colorTertiaryContainer) :
+                    getThemeColor(com.google.android.material.R.attr.colorPrimaryContainer);
 
             button.setBackgroundTintList(ColorStateList.valueOf(backgroundColor));
         }
@@ -841,7 +841,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return getPackageManager().canRequestPackageInstalls();
     }
 
-    private Runnable deleteRunnable = new Runnable() {
+    private final Runnable deleteRunnable = new Runnable() {
         @Override
         public void run() {
             if (isLongPressing) {
